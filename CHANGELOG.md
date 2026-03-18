@@ -8,7 +8,6 @@ All notable changes to this skill will be documented in this file.
 
 ---
 
-## [1.2.2] - 2026-03-18
 ## [1.2.3] - 2026-03-18 (Documentation Update)
 
 ### Added
@@ -32,6 +31,7 @@ All notable changes to this skill will be documented in this file.
 
 ---
 
+## [1.2.2] - 2026-03-18 (Final Testing & Optimization)
 
 ### Added
 - Full bilingual documentation (README now separates English and Chinese sections for readability)
@@ -63,7 +63,7 @@ All notable changes to this skill will be documented in this file.
 
 ---
 
-## [1.2.1] - 2026-03-18
+## [1.2.1] - 2026-03-18 (Two-Step Message Injection Attempt)
 
 ### Added
 - Two-step message injection attempt: Due to CLI length limits, installer first creates task with short message, then attempts to update with full details via `cron edit`
@@ -124,9 +124,11 @@ All notable changes to this skill will be documented in this file.
 ### From 1.1.0/1.2.0 to 1.2.2
 1. Run `./uninstall.sh` to remove old tasks
 2. Replace skill directory with v1.2.2
-3. Run `./install.sh` to register tasks
+3. Run `./install.sh` to register tasks (now with two-step message injection)
 4. Existing `.compression_state.json` files will be preserved (backward compatible)
-5. If you need fully detailed task messages, manually run `openclaw cron edit <task_name> --message "$(cat FULL_MESSAGE.txt)"` after install
+
+### From 1.2.2 to 1.2.3 (Documentation Update)
+No functional changes. Simply update the skill files to the latest version.
 
 ### Fresh Install
 Simply run `./install.sh` after placing the skill in `/root/.openclaw/workspace/skills/`.
@@ -135,17 +137,17 @@ Simply run `./install.sh` after placing the skill in `/root/.openclaw/workspace/
 
 ## Version Comparison
 
-| Feature | 1.1.0 | 1.2.0 | 1.2.1 | 1.2.2 |
-|---------|-------|-------|-------|-------|
-| Auto-discovery | ✅ | ✅ | ✅ | ✅ |
-| State persistence | ❌ | ✅ | ✅ | ✅ |
-| Deduplication | ❌ | ✅ | ✅ | ✅ |
-| Domain filtering | ❌ | ✅ | ✅ | ✅ |
-| Moved-file marking | ❌ | ✅ | ✅ | ✅ |
-| Bilingual docs | ❌ | ❌ | ❌ | ✅ |
-| Test artifacts | ❌ | ❌ | ❌ | ✅ |
-| Production readiness label | ❌ | ❌ | ❌ | ✅ |
-| CLI length workaround | ❌ | ❌ | ⚠️ two-step attempt | ✅ concise template |
+| Feature | 1.1.0 | 1.2.0 | 1.2.1 | 1.2.2 | 1.2.3 |
+|---------|-------|-------|-------|-------|-------|
+| Auto-discovery | ✅ | ✅ | ✅ | ✅ | ✅ |
+| State persistence | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Deduplication | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Domain filtering | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Moved-file marking | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Bilingual docs | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Test artifacts | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Production readiness label | ❌ | ❌ | ❌ | ✅ | ✅ |
+| CLI length workaround | ❌ | ❌ | ⚠️ two-step attempt | ✅ concise template | ✅ concise template |
 
 ---
 
@@ -168,34 +170,34 @@ This skill is actively iterated and tested. While core functionality is stable, 
 
 ---
 
-## [1.2.2] - 2026-03-18（最终测试与优化）
-## [1.2.3] - 2026-03-18 (Documentation Update)
+## [1.2.3] - 2026-03-18（文档更新）
 
-### Added
-- Separated English and Chinese documentation in README and CHANGELOG for improved readability
-- "Please scroll down for Chinese" notice at the top of each document
-- Comprehensive version & release protocol added to AGENTS.md
+### 新增
+- **分离式双语文档** - README 和 CHANGELOG 现已分离为独立的英文和中文部分，提高可读性
+- **滚动提示** - 每个文档顶部加入"请往下翻页查看中文说明"提示
+- **版本发布协议** - 在 AGENTS.md 中添加版本与发布协议，规范变更流程
 
-### Changed
-- Documentation structure: English content first, then full Chinese translation after separator
-- README and CHANGELOG now fully bilingual with clear section separation
+### 变更
+- **文档结构** - 英文内容在前，完整中文翻译在后，用分隔线清晰划分
+- **双语文档** - README 和 CHANGELOG 均实现双语，结构分明
 
-### Fixed
-- None (documentation only)
+### 修复
+- 无（仅为文档更新）
 
-### Known Issues
-- Same as v1.2.2; no new issues
+### 已知问题
+- 与 1.2.2 相同；无新问题
 
-### Tested
-- ✅ Documentation rendering tested in Markdown viewers
-- ✅ All bilingual links and references verified
+### 已测试
+- ✅ 文档渲染测试（Markdown 查看器）
+- ✅ 所有双语链接和引用验证
 
 ---
 
+## [1.2.2] - 2026-03-18（最终测试与优化）
 
 ### 新增
-- **完整双语文档** - README 和 CHANGELOG 现已提供中英文版本，便于更广泛的使用
-- **测试文档部分** - 记录测试结果、已知限制和手动验证步骤
+- **完整双语文档** - README 现在分离英文和中文章节以提高可读性
+- **测试文物部分** - 记录已验证场景和手动验证步骤
 - **生产就绪清单** - 每个功能都有清晰的状态指示
 
 ### 变更
@@ -220,11 +222,6 @@ This skill is actively iterated and tested. While core functionality is stable, 
 - ✅ 任务负载包含状态跟踪、去重、领域上下文、移动文件标记
 - ✅ 安装期间网关日志无错误
 - ✅ 每日笔记 (2026-03-18) 捕获完整会话历史
-
-### 文档
-- **README_EN.md** - 英文版，包含快速入门、技术说明和故障排除
-- **README_ZH.md** - 中文版，内容相同
-- **CHANGELOG.md** - 从 v1.2.0 开始为双语条目
 
 ---
 
@@ -291,7 +288,9 @@ This skill is actively iterated and tested. While core functionality is stable, 
 2. 替换技能目录为 v1.2.2
 3. 运行 `./install.sh` 注册任务
 4. 现有的 `.compression_state.json` 文件将被保留（向后兼容）
-5. 如果需要完整详细的任务消息，安装后手动运行 `openclaw cron edit <task_name> --message "$(cat FULL_MESSAGE.txt)"`
+
+### 从 1.2.2 到 1.2.3（文档更新）
+无功能变更。只需将技能文件更新到最新版本即可。
 
 ### 全新安装
 只需将技能放置在 `/root/.openclaw/workspace/skills/` 后运行 `./install.sh`。
@@ -300,17 +299,17 @@ This skill is actively iterated and tested. While core functionality is stable, 
 
 ## 版本对比
 
-| 功能 | 1.1.0 | 1.2.0 | 1.2.1 | 1.2.2 |
-|------|-------|-------|-------|-------|
-| 自动发现 | ✅ | ✅ | ✅ | ✅ |
-| 状态持久化 | ❌ | ✅ | ✅ | ✅ |
-| 去重 | ❌ | ✅ | ✅ | ✅ |
-| 领域过滤 | ❌ | ✅ | ✅ | ✅ |
-| 移动文件标记 | ❌ | ✅ | ✅ | ✅ |
-| 双语文档 | ❌ | ❌ | ❌ | ✅ |
-| 测试文物 | ❌ | ❌ | ❌ | ✅ |
-| 生产就绪标签 | ❌ | ❌ | ❌ | ✅ |
-| CLI 长度变通 | ❌ | ❌ | ⚠️ 两步尝试 | ✅ 简洁模板 |
+| 功能 | 1.1.0 | 1.2.0 | 1.2.1 | 1.2.2 | 1.2.3 |
+|------|-------|-------|-------|-------|-------|
+| 自动发现 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 状态持久化 | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 去重 | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 领域过滤 | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 移动文件标记 | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 双语文档 | ❌ | ❌ | ❌ | ✅ | ✅ |
+| 测试文物 | ❌ | ❌ | ❌ | ✅ | ✅ |
+| 生产就绪标签 | ❌ | ❌ | ❌ | ✅ | ✅ |
+| CLI 长度变通 | ❌ | ❌ | ⚠️ 两步尝试 | ✅ 简洁模板 | ✅ 简洁模板 |
 
 ---
 
