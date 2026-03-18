@@ -11,8 +11,8 @@ All notable changes to this skill will be documented in this file.
 ## [1.3.0] - 2026-03-18 (Security & Privacy Fix)
 
 ### Security
-- **Removed hardcoded credentials**: Eliminated hardcoded DingTalk recipient ID (`05566651511149398`) from install script and documentation
-- **Removed hardcoded model**: Eliminated fixed model reference (`openrouter/stepfun/step-3.5-flash:free`) from install script
+- **Removed hardcoded credentials**: Eliminated hardcoded DingTalk recipient ID from install script and documentation
+- **Removed hardcoded model**: Eliminated fixed model reference from install script
 - **Automatic configuration**: Installer now infers `--model`, `--channel`, and `--to` from the user's current OpenClaw configuration instead of using hardcoded values
 - **Privacy protection**: No personal identifiers or specific model names are baked into the skill package
 
