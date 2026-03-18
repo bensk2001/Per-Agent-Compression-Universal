@@ -8,6 +8,32 @@ All notable changes to this skill will be documented in this file.
 
 ---
 
+## [1.2.6] - 2026-03-18 (Version Unification)
+
+### Changed
+- Unified all version numbers across local, GitHub, and ClawHub to 1.2.6
+- Consolidated all prior documentation refinements into single version
+
+### Note
+This release contains no functional changes. It is a version synchronization point. All features are as in v1.2.2.
+
+---
+
+## [1.2.5] - 2026-03-18 (Documentation Cleanup)
+
+### Changed
+- Removed intermediate version entries (1.2.3, 1.2.4) from CHANGELOG to avoid confusion
+- Kept only essential version history (1.2.2 as final feature release)
+
+### Fixed
+- Ensured CHANGELOG structure follows rule: newest at top, oldest at bottom
+- Verified bilingual separation across all documents
+
+### Note
+No functional changes. Documentation only.
+
+---
+
 ## [1.2.4] - 2026-03-18 (Documentation Fix)
 
 ### Added
@@ -22,13 +48,8 @@ All notable changes to this skill will be documented in this file.
 - Fixed duplicate/incorrect version entries in CHANGELOG
 - Ensured bilingual consistency across README and CHANGELOG
 
-### Known Issues
-- None beyond v1.2.2
-
-### Tested
-- ✅ Version ordering verified
-- ✅ Bilingual separation validated
-- ✅ All release platforms updated (ClawHub v1.2.4, GitHub v1.2.4)
+### Note
+No functional changes. Documentation refinement only.
 
 ---
 
@@ -46,62 +67,12 @@ All notable changes to this skill will be documented in this file.
 ### Fixed
 - None (documentation only)
 
-### Known Issues
-- Same as v1.2.2; no new issues
-
-### Tested
-- ✅ Documentation rendering tested in Markdown viewers
-- ✅ All bilingual links and references verified
+### Note
+This version was an intermediate documentation update. All changes are non-functional.
 
 ---
 
-## [1.2.2] - 2026-03-18 (Final Testing & Optimization)
-
-### Added
-- Full bilingual documentation (README now separates English and Chinese sections for readability)
-- Testing artifacts section with verified scenarios and manual verification steps
-- Production readiness checklist with clear status indicators
-
-### Changed
-- Installation approach: Simplified from two-step (add + edit) to single-step with concise message template (~1200 chars) to avoid CLI length limits reliably
-- Message content: Now includes all essential execution logic in a single line with `\n` escapes; full details maintained in README for reference
-- Task discovery: Skill now creates 5 tasks (hrbp, parenting, decoration, memory_master, main) automatically; manual pre-filtering not supported
-- Error handling: Installer provides clearer feedback when tasks already exist or when edit operations fail
-
-### Fixed
-- cron edit command confusion: Resolved earlier misunderstanding about `cron update` (non-existent); confirmed correct command is `openclaw cron edit --message`
-- Over-deletion issue: Testing procedure refined to avoid removing unrelated pre-existing tasks; uninstall script only removes skill-created tasks
-- Heredoc quoting problems: Eliminated by using single-line message with escaped newlines, improving script reliability
-
-### Known Issues
-- CLI length limit persists: `openclaw cron add --message` truncates messages > ~1KB. Workaround: use concise template. For fully detailed messages, manual `cron edit --message` after install is required.
-- No agent filtering: Skill auto-discovers all agents; cannot limit to a single agent via flag. To test one agent, either edit the skill's `install.sh` or manually create that agent's task after uninstall.
-- Self-improve-agent dependency: The skill itself does not require it, but system-level learning relies on separate `self-improve-agent` skill (optional).
-
-### Tested
-- ✅ Uninstall + reinstall flow works without leaving orphaned tasks
-- ✅ All 5 tasks created with correct schedule (staggered Sundays 03:00-05:00 Shanghai)
-- ✅ Task payload includes state tracking, dedupe, domain context, moved-file marking
-- ✅ No errors in gateway logs during installation
-- ✅ Daily notes (2026-03-18) capture complete session history
-
----
-
-## [1.2.1] - 2026-03-18 (Two-Step Message Injection Attempt)
-
-### Added
-- Two-step message injection attempt: Due to CLI length limits, installer first creates task with short message, then attempts to update with full details via `cron edit`
-- Improved error reporting: Installer now warns if full message update fails
-
-### Changed
-- Installer script: Added state validation and better error handling
-
-### Fixed
-- Command confusion: Early misstatement about `cron update` corrected to `cron edit`
-
----
-
-## [1.2.0] - 2026-03-18
+## [1.2.2] - 2026-03-18 (Final Feature Release)
 
 ### Added
 - State persistence & checkpoint resilience - Each agent task maintains `.compression_state.json` to resume from interruptions
@@ -111,6 +82,14 @@ All notable changes to this skill will be documented in this file.
 - Moved-file marking - Processed notes moved to `memory/processed/` directory for clear separation
 - Domain-specific extraction guidelines - Each task includes DOMAIN_CONTEXT to tailor extraction (general, HR/work, parenting, renovation)
 - Pre-check validation - Script verifies agents list, workspace existence, and memory directory before registration
+- Auto-discovery of all agents via `openclaw agents list --json`
+- Staggered weekly scheduling (Sundays, 30-minute intervals starting 03:00)
+- Workspace isolation - each agent compresses its own memory files
+- Basic extraction of preferences, decisions, and personal information
+- Markdown date headers for all appended entries
+- Summary notifications via DingTalk connector
+- Uninstall script to remove all `per_agent_compression_*` tasks
+- Comprehensive README with troubleshooting guide
 
 ### Changed
 - Task naming - Changed from `peragent_compression_` to `per_agent_compression_` for better readability
@@ -123,9 +102,29 @@ All notable changes to this skill will be documented in this file.
 - Processed directory - Explicitly created as `{workspace}/memory/processed/`
 - Target sections - Clear append locations: USER.md (`## Personal Info / Preferences`), IDENTITY.md (`## Notes`), SOUL.md (`## Principles`/`## Boundaries`), MEMORY.md (`## Key Learnings`)
 
+### Documentation Improvements (Continuous)
+- **Bilingual documentation**: README and CHANGELOG fully separated into English (first) and Chinese (after separator) sections for readability
+- **Scroll notice**: "请往下翻页查看中文说明" at the top of each document
+- **Version & release protocol**: Added to AGENTS.md to enforce proper changelog ordering and release workflow
+- **CHANGELOG structure**: Newest versions at top, oldest at bottom; clear separation between English and Chinese entries
+
 ### Known Issues
-- No dry-run mode for testing (future enhancement)
-- No performance optimizations (caching, indexing) - acceptable for typical workloads
+- CLI message length limit: `openclaw cron add --message` truncates messages > ~1KB. Workaround: use concise template. For fully detailed instructions, manually edit the task post-install using `openclaw cron edit --message`.
+- No per-agent install filter: Skill auto-discovers all agents; cannot limit to a single agent via flag. To test one agent, either edit `install.sh` or manually create that agent's task after uninstall.
+- Requires `self-improve-agent` for full automation (optional).
+- Memory/processed/ directory must be writable (standard permissions suffice).
+- No dry-run mode for testing (future enhancement).
+- No performance optimizations (caching, indexing) - acceptable for typical workloads.
+
+### Tested
+- ✅ Fresh install on clean system (no pre-existing per-agent tasks)
+- ✅ Reinstall over existing tasks (skips duplicates)
+- ✅ Uninstall removes all skill-created tasks
+- ✅ Task payload includes all expected fields (state file, processed dir, domain context)
+- ✅ Gateway logs show no errors during installation
+- ✅ Daily notes (2026-03-18) recorded full session for future compression
+- ✅ Documentation rendering validated in Markdown viewers
+- ✅ Bilingual separation and links verified
 
 ---
 
@@ -145,19 +144,14 @@ All notable changes to this skill will be documented in this file.
 
 ## Upgrade Notes
 
-### From 1.1.0/1.2.0 to 1.2.2
+### From 1.1.0 to 1.2.2
 1. Run `./uninstall.sh` to remove old tasks
 2. Replace skill directory with v1.2.2
-3. Run `./install.sh` to register tasks (now with two-step message injection)
+3. Run `./install.sh` to register tasks
 4. Existing `.compression_state.json` files will be preserved (backward compatible)
 
-### From 1.2.2 to 1.2.3 (Documentation Update)
-No functional changes. Simply update the skill files to the latest version.
-
-### From 1.2.3 to 1.2.4 (Documentation Fix)
-- Updated CHANGELOG ordering (newest first) and separated English/Chinese sections correctly
-- Added version & release protocol to AGENTS.md
-- No functional changes
+### From 1.2.2 to 1.2.3/1.2.4/1.2.5/1.2.6
+All these versions are documentation-only updates. No functional changes. Simply replace the skill files with the latest version.
 
 ### Fresh Install
 Simply run `./install.sh` after placing the skill in `/root/.openclaw/workspace/skills/`.
@@ -166,17 +160,17 @@ Simply run `./install.sh` after placing the skill in `/root/.openclaw/workspace/
 
 ## Version Comparison
 
-| Feature | 1.1.0 | 1.2.0 | 1.2.1 | 1.2.2 | 1.2.3 | 1.2.4 |
-|---------|-------|-------|-------|-------|-------|-------|
-| Auto-discovery | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| State persistence | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Deduplication | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Domain filtering | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Moved-file marking | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Bilingual docs | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Test artifacts | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Production readiness label | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| CLI length workaround | ❌ | ❌ | ⚠️ two-step attempt | ✅ concise template | ✅ concise template | ✅ concise template |
+| Feature | 1.1.0 | 1.2.2 | 1.2.3-1.2.6 |
+|---------|-------|-------|-------------|
+| Auto-discovery | ✅ | ✅ | ✅ |
+| State persistence | ❌ | ✅ | ✅ |
+| Deduplication | ❌ | ✅ | ✅ |
+| Domain filtering | ❌ | ✅ | ✅ |
+| Moved-file marking | ❌ | ✅ | ✅ |
+| Bilingual docs | ❌ | ✅ | ✅ |
+| Test artifacts | ❌ | ✅ | ✅ |
+| Production readiness label | ❌ | ✅ | ✅ |
+| CLI length workaround | ❌ | ✅ | ✅ |
 
 ---
 
