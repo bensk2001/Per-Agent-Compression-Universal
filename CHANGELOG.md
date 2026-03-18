@@ -9,6 +9,29 @@ All notable changes to this skill will be documented in this file.
 ---
 
 ## [1.2.2] - 2026-03-18
+## [1.2.3] - 2026-03-18 (Documentation Update)
+
+### Added
+- Separated English and Chinese documentation in README and CHANGELOG for improved readability
+- "Please scroll down for Chinese" notice at the top of each document
+- Comprehensive version & release protocol added to AGENTS.md
+
+### Changed
+- Documentation structure: English content first, then full Chinese translation after separator
+- README and CHANGELOG now fully bilingual with clear section separation
+
+### Fixed
+- None (documentation only)
+
+### Known Issues
+- Same as v1.2.2; no new issues
+
+### Tested
+- ✅ Documentation rendering tested in Markdown viewers
+- ✅ All bilingual links and references verified
+
+---
+
 
 ### Added
 - Full bilingual documentation (README now separates English and Chinese sections for readability)
@@ -146,6 +169,29 @@ This skill is actively iterated and tested. While core functionality is stable, 
 ---
 
 ## [1.2.2] - 2026-03-18（最终测试与优化）
+## [1.2.3] - 2026-03-18 (Documentation Update)
+
+### Added
+- Separated English and Chinese documentation in README and CHANGELOG for improved readability
+- "Please scroll down for Chinese" notice at the top of each document
+- Comprehensive version & release protocol added to AGENTS.md
+
+### Changed
+- Documentation structure: English content first, then full Chinese translation after separator
+- README and CHANGELOG now fully bilingual with clear section separation
+
+### Fixed
+- None (documentation only)
+
+### Known Issues
+- Same as v1.2.2; no new issues
+
+### Tested
+- ✅ Documentation rendering tested in Markdown viewers
+- ✅ All bilingual links and references verified
+
+---
+
 
 ### 新增
 - **完整双语文档** - README 和 CHANGELOG 现已提供中英文版本，便于更广泛的使用
