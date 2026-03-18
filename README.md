@@ -1,10 +1,10 @@
-请往下翻页查看中文说明
+**[skip to Chinese](#chinese-version)** | 请往下翻页查看中文说明
 
 ---
 
 # Per-Agent Memory Compression Skill (Universal)
 
-**Version**: 1.3.1  
+**Version**: 1.3.3  
 **Purpose**: Zero-config deployment of weekly memory consolidation for multi-agent OpenClaw systems  
 **Created**: 2026-03-18  
 **Compatibility**: OpenClaw 2026.3.8+  
@@ -272,6 +272,8 @@ This skill is open for improvement. Found a bug or have an enhancement?
 **状态**: ✅ 生产就绪（轻量测试）
 
 ---
+
+<a name="chinese-version"></a>
 
 ## 价值主张
 

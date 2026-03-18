@@ -1,58 +1,91 @@
-# Per-Agent Memory Compression Skill (Universal)
+# Per-Agent Memory Compression (Universal)
 
-## Purpose | 目的
+> Zero-config memory consolidation for multi-agent OpenClaw deployments
 
-This skill automates weekly memory consolidation for every agent in your OpenClaw system. It discovers all agents with workspaces and creates a dedicated cron task for each, ensuring that each agent maintains its own long-term memory (USER.md, IDENTITY.md, SOUL.md, MEMORY.md) with extracted preferences, decisions, and personal information.
+## Summary
 
-本技能为 OpenClaw 系统中的每个代理自动化每周记忆整合。它发现所有带有工作区的代理，并为每个创建专用的 cron 任务，确保每个代理维护自己的长期记忆（USER.md、IDENTITY.md、SOUL.md、MEMORY.md），包含提取的偏好、决策和个人信息。
+This skill automatically sets up weekly memory compression tasks for all agents in your OpenClaw deployment. Each agent compresses its own daily notes into long-term memory files (USER.md, IDENTITY.md, SOUL.md, MEMORY.md) with domain-specific extraction.
 
-## Features | 特性
+No manual configuration required—just run the installer and it auto-discovers all agents and creates staggered cron tasks.
 
-- Zero-config auto-discovery | 零配置自动发现
-- Per-agent workspace isolation | 每个代理工作区隔离
-- State persistence & checkpoint | 状态持久化与断点
-- Deduplication | 去重
-- Domain-aware extraction | 领域感知提取
-- Moved-file marking | 移动文件标记
-- DingTalk summary notifications | 钉钉摘要通知
+## Features
 
-## Installation | 安装
+- ✅ Auto-discovery of all agents via `openclaw agents list --json`
+- ✅ Workspace isolation (each agent compresses its own memory)
+- ✅ State persistence with checkpoint resilience (`.compression_state.json`)
+- ✅ Deduplication to avoid double-processing
+- ✅ Domain-tailored extraction (general, HR, parenting, decoration)
+- ✅ Summary notifications via DingTalk connector
+- ✅ Staggered weekly schedule (Sundays 03:00-04:30)
+- ✅ Configurable via `alert_rules.json`, `topic_keywords.json`, `user_map.json`
 
-```bash
-cd /root/.openclaw/workspace
-chmod +x skills/per-agent-compression-universal/install.sh
-./skills/per-agent-compression-universal/install.sh
-```
-
-## How It Works | 工作原理
-
-1. **Discovery**: Runs `openclaw agents list --json` to find all agents with a `workspace`.
-2. **Task Creation**: For each agent, creates a cron task named `per_agent_compression_<agent_id>` with schedule staggered from Sunday 03:00 Shanghai.
-3. **Execution**: When triggered, the `main` agent executes the consolidation logic:
-   - Reads daily notes older than 7 days from `{workspace}/memory/`
-   - Extracts user preferences, key decisions, personal info (domain-specific)
-   - Appends to `USER.md`, `IDENTITY.md`, `SOUL.md`, `MEMORY.md` with date headers
-   - Moves processed notes to `{workspace}/memory/processed/`
-   - Updates `{workspace}/memory/.compression_state.json` for checkpoint
-   - Sends summary to DingTalk
-
-## Configuration | 配置
-
-No configuration needed. To customize schedule or domain context, edit `install.sh` before running.
-
-## Uninstall | 卸载
+## Installation
 
 ```bash
-./skills/per-agent-compression-universal/uninstall.sh
+# Copy the skill to your skills directory
+cp -r per-agent-compression-universal /root/.openclaw/skills/
+
+# Run the installer from the skill directory
+cd /root/.openclaw/skills/per-agent-compression-universal
+./install.sh
 ```
 
-## Notes | 注意
+The installer will:
+- Verify your agent list
+- Create a cron task for each discovered agent
+- Set up necessary directories and state files
+- Validate memory paths
 
-- This skill is in active testing; see CHANGELOG.md for known issues.
-- The task messages are concise due to CLI length limits; full details are in README.
-- If you need to edit a task's message manually: `openclaw cron edit per_agent_compression_<agent_id> --message "..."`
+**No parameters needed**—all settings inferred from your OpenClaw configuration.
 
-## Support | 支持
+## Uninstallation
 
-- Changelog: CHANGELOG.md
-- Issues: Report via GitHub or ClawHub
+```bash
+./uninstall.sh
+```
+
+Removes all `per_agent_compression_*` cron tasks created by this skill.
+
+## Configuration
+
+### Agent-Specific Behavior
+
+Each agent's task uses a tailored `DOMAIN_CONTEXT`:
+- `main`: General-purpose extraction (USER.md, IDENTITY.md, SOUL.md, MEMORY.md)
+- `hrbp`: Focus on work-related preferences, decisions, HR policies
+- `parenting`: Parenting themes (sleep, feeding, health, development)
+- `decoration`: Renovation-related insights (design, materials, quotes)
+
+### Rule Files
+
+Placed in each agent's workspace `shared_memory/`:
+
+- `topic_keywords.json` – Keyword-to-topic mapping for categorization
+- `alert_rules.json` – Alert frequency and limits
+- `alert_state.json` – Cooldown tracking (auto-maintained)
+- `user_map.json` – Platform user ID to person nicknames
+
+These files follow the same format as the shared memory system described in `PROMPT_FULL_SHARED_MEMORY.md`.
+
+### Timeouts
+
+Default task timeout: 1200s (20 minutes). Adjust via `openclaw cron edit <id> --timeout-seconds <seconds>` if you have many notes.
+
+## Limitations
+
+- Requires `self-improve-agent` for full automation (optional).
+- CLI message length limit may require manual `cron edit --message` for fully detailed payloads.
+- No per-agent install filter—auto-discovers all agents. To limit, edit `install.sh`.
+- Not yet optimized for extremely large note sets (>500 daily notes per run).
+
+## Support
+
+See `README.md` for detailed architecture, troubleshooting, and upgrade notes.
+
+## License
+
+MIT-0
+
+## Version
+
+1.3.2 (2026-03-18)
