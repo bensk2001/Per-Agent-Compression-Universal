@@ -4,7 +4,7 @@
 
 # Per-Agent Memory Compression Skill (Universal)
 
-**Version**: 1.2.6  
+**Version**: 1.3.0  
 **Purpose**: Zero-config deployment of weekly memory consolidation for multi-agent OpenClaw systems  
 **Created**: 2026-03-18  
 **Compatibility**: OpenClaw 2026.3.8+  
@@ -82,14 +82,17 @@ openclaw cron add \
   --tz "Asia/Shanghai" \
   --agent "main" \
   --message "<concise_execution_plan>" \
-  --model "openrouter/stepfun/step-3.5-flash:free" \
   --timeout 1200 \
   --session "isolated" \
-  --announce \
-  --channel "dingtalk-connector" \
-  --to "05566651511149398" \
-  --best-effort-deliver
+  --announce
 ```
+
+**Note**: The `--model`, `--channel`, and `--to` parameters are **automatically inferred** from your current OpenClaw configuration:
+- `--model`: Uses the system's default model (or agent's configured model)
+- `--channel`: Uses the channel configured for the target (e.g., `dingtalk-connector`)
+- `--to`: Uses the recipient configured for that channel (from your OpenClaw channel config)
+
+No hardcoded values are used. The installer adapts to your environment.
 
 **Note on message length**: Due to CLI constraints, the `--message` is kept concise (~1200 chars) but contains all essential logic. Full details are documented in this README. If you need the ultra-detailed version (with every step and edge case), you can manually edit the task after install:
 
@@ -340,14 +343,17 @@ openclaw cron add \
   --tz "Asia/Shanghai" \
   --agent "main" \
   --message "<concise_execution_plan>" \
-  --model "openrouter/stepfun/step-3.5-flash:free" \
   --timeout 1200 \
   --session "isolated" \
-  --announce \
-  --channel "dingtalk-connector" \
-  --to "05566651511149398" \
-  --best-effort-deliver
+  --announce
 ```
+
+**注意**：`--model`、`--channel` 和 `--to` 参数会自动从您当前的 OpenClaw 配置中推断：
+- `--model`: 使用系统默认模型（或代理配置的模型）
+- `--channel`: 使用配置的目标通道（如 `dingtalk-connector`）
+- `--to`: 使用该通道配置的接收者（来自 OpenClaw 通道配置）
+
+不使用任何硬编码值。安装程序会适应您的环境。
 
 **关于消息长度的说明**：由于 CLI 限制，`--message` 保持简洁（约 1200 字符）但包含所有基本逻辑。完整细节记录在本 README 中。如果需要超详细版本（包含每个步骤和边缘情况），可以在安装后手动编辑任务：
 

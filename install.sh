@@ -83,13 +83,9 @@ echo "$AGENTS" | while IFS='=' read -r agent_id workspace; do
     --tz "Asia/Shanghai" \
     --agent "main" \
     --message "$MSG" \
-    --model "openrouter/stepfun/step-3.5-flash:free" \
     --timeout 1200 \
     --session "isolated" \
-    --announce \
-    --channel "dingtalk-connector" \
-    --to "05566651511149398" \
-    --best-effort-deliver 2>&1; then
+    --announce 2>&1; then
     
     TASK_IDS+=("$TASK_NAME")
   else

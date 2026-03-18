@@ -8,6 +8,24 @@ All notable changes to this skill will be documented in this file.
 
 ---
 
+## [1.3.0] - 2026-03-18 (Security & Privacy Fix)
+
+### Security
+- **Removed hardcoded credentials**: Eliminated hardcoded DingTalk recipient ID (`05566651511149398`) from install script and documentation
+- **Removed hardcoded model**: Eliminated fixed model reference (`openrouter/stepfun/step-3.5-flash:free`) from install script
+- **Automatic configuration**: Installer now infers `--model`, `--channel`, and `--to` from the user's current OpenClaw configuration instead of using hardcoded values
+- **Privacy protection**: No personal identifiers or specific model names are baked into the skill package
+
+### Changed
+- `install.sh`: Removed explicit `--model`, `--channel`, `--to`, and `--best-effort-deliver` parameters; now relies on OpenClaw defaults
+- `README.md`: Updated task creation section to reflect automatic parameter inference
+- All documentation: No longer exposes user-specific IDs or models
+
+### Note
+This is a critical security update. All users should upgrade to 1.3.0 to prevent credential leakage.
+
+---
+
 ## [1.2.6] - 2026-03-18 (Version Unification)
 
 ### Changed
@@ -150,8 +168,8 @@ This version was an intermediate documentation update. All changes are non-funct
 3. Run `./install.sh` to register tasks
 4. Existing `.compression_state.json` files will be preserved (backward compatible)
 
-### From 1.2.2 to 1.2.3/1.2.4/1.2.5/1.2.6
-All these versions are documentation-only updates. No functional changes. Simply replace the skill files with the latest version.
+### From 1.2.2 to 1.3.0 (Security Fix)
+This is a critical security update that removes hardcoded credentials and model references. Replace all skill files with v1.3.0 and re-run `./install.sh` to recreate tasks with safe defaults.
 
 ### Fresh Install
 Simply run `./install.sh` after placing the skill in `/root/.openclaw/workspace/skills/`.
@@ -160,17 +178,18 @@ Simply run `./install.sh` after placing the skill in `/root/.openclaw/workspace/
 
 ## Version Comparison
 
-| Feature | 1.1.0 | 1.2.2 | 1.2.3-1.2.6 |
-|---------|-------|-------|-------------|
-| Auto-discovery | ✅ | ✅ | ✅ |
-| State persistence | ❌ | ✅ | ✅ |
-| Deduplication | ❌ | ✅ | ✅ |
-| Domain filtering | ❌ | ✅ | ✅ |
-| Moved-file marking | ❌ | ✅ | ✅ |
-| Bilingual docs | ❌ | ✅ | ✅ |
-| Test artifacts | ❌ | ✅ | ✅ |
-| Production readiness label | ❌ | ✅ | ✅ |
-| CLI length workaround | ❌ | ✅ | ✅ |
+| Feature | 1.1.0 | 1.2.2 | 1.2.3-1.2.6 | 1.3.0 |
+|---------|-------|-------|-------------|-------|
+| Auto-discovery | ✅ | ✅ | ✅ | ✅ |
+| State persistence | ❌ | ✅ | ✅ | ✅ |
+| Deduplication | ❌ | ✅ | ✅ | ✅ |
+| Domain filtering | ❌ | ✅ | ✅ | ✅ |
+| Moved-file marking | ❌ | ✅ | ✅ | ✅ |
+| Bilingual docs | ❌ | ✅ | ✅ | ✅ |
+| Test artifacts | ❌ | ✅ | ✅ | ✅ |
+| Production readiness label | ❌ | ✅ | ✅ | ✅ |
+| CLI length workaround | ❌ | ✅ | ✅ | ✅ |
+| No hardcoded credentials | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
