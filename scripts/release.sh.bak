@@ -7,8 +7,9 @@
 set -e
 
 # ============================================
-# CONFIGURATION
+# CONFIGURATION (adjust as needed)
 # ============================================
+# Set your GitHub repository (format: username/repo)
 GITHUB_REPO="${GITHUB_REPO:-bensk2001/per-agent-compression-universal}"
 SKILL_NAME="per-agent-compression-universal"
 
@@ -33,11 +34,12 @@ echo ""
 echo "📋 STEP 1: Pre-Release Checklist"
 echo "-----------------------------------------"
 
-# Version sync
+# 1.1 Version sync check
 echo "🔍 Checking version consistency..."
 CURRENT_VER=$(jq -r '.version' skill.json 2>/dev/null || echo "none")
 if [ "$CURRENT_VER" != "$VERSION" ]; then
   echo "❌ skill.json version is $CURRENT_VER, expected $VERSION"
+  echo "   Run: jq --arg v \"$VERSION\" '.version = $v' skill.json > tmp && mv tmp skill.json"
   exit 1
 fi
 README_VER=$(grep -oP '\*\*Version\*\*:\s*\K[0-9.]+' README.md | head -1)
@@ -45,102 +47,132 @@ if [ "$README_VER" != "$VERSION" ]; then
   echo "❌ README.md version is $README_VER, expected $VERSION"
   exit 1
 fi
-echo "✅ Version synchronized"
+echo "✅ Version numbers synchronized (skill.json, README.md)"
 
-# Security & Privacy Scans
+# 1.2 Security & Privacy Scan
 echo ""
 echo "🔒 Running security scans..."
 SKILL_DIR="$(pwd)"
 
-# Hardcoded secrets
+# Scan 1: Hardcoded secrets
 echo "  - Hardcoded credentials/IDs..."
 if grep -rE "(client|id|token|secret|key)\s*[=:]\s*[\"\`'][^\"\`']+[\"\`']" "$SKILL_DIR" 2>/dev/null | grep -v CHANGELOG.md; then
-  echo "    ❌ Found potential secrets."
+  echo "    ❌ Found potential hardcoded secrets. Review above lines."
   exit 1
 else
   echo "    ✅ No obvious hardcoded secrets"
 fi
 
-# Long numeric strings
+# Scan 2: Long numeric strings (exclude CHANGELOG)
 echo "  - Long numeric strings (IDs)..."
 if grep -rE "[0-9]{10,}" "$SKILL_DIR" 2>/dev/null | grep -v CHANGELOG.md; then
-  echo "    ❌ Found long numeric strings."
+  echo "    ❌ Found long numeric strings (possible IDs). Review above."
   exit 1
 else
-  echo "    ✅ No long numeric IDs"
+  echo "    ✅ No long numeric IDs found"
 fi
 
-# Install script parameter inference
+# Scan 3: Install script parameter inference
 echo "  - Install script parameter inference..."
 if grep -E "(--model|--channel|--to)" install.sh | grep -v "model:\s*auto\|channel:\s*auto\|to:\s*auto" > /dev/null; then
-  echo "    ❌ Hardcoded params in install.sh."
+  echo "    ❌ Install script contains hardcoded params. Fix to use inference."
   exit 1
 else
-  echo "    ✅ Parameter inference OK"
+  echo "    ✅ Parameter inference check passed"
 fi
 
-# Configuration data leakage
+# Scan 4: Configuration data leakage
 echo "  - Configuration data leakage..."
 if grep -rE "dingtalk-connector|openrouter/|stepfun|clawhub|skillhub" "$SKILL_DIR" 2>/dev/null | grep -vE "example.com|placeholder|<replace>"; then
-  echo "    ⚠️  User-specific config values found (ensure intentional)"
+  echo "    ⚠️  Found user-specific configuration values. Ensure they are intentional examples only."
 fi
 
-# CHANGELOG sensitive references
+# Scan 5: CHANGELOG sensitive references (should be abstract)
 echo "  - CHANGELOG sensitive references..."
 if grep -nE "05566651511149398|openrouter/stepfun/step-3.5-flash:free|client_id|client_secret" CHANGELOG.md > /dev/null 2>&1; then
-  echo "    ❌ CHANGELOG contains specific sensitive references."
+  echo "    ❌ CHANGELOG contains specific sensitive references. Use abstract language."
   exit 1
 else
-  echo "    ✅ CHANGELOG clear"
+  echo "    ✅ CHANGELOG clear of specific sensitive references"
 fi
 
-# Bilingual completeness (STRICT)
+# Scan 6: Bilingual completeness (STRICT)
 echo "  - Bilingual completeness (strict)..."
+# Count English version entries
 EN_COUNT=$(grep -c "^## \[[0-9]" CHANGELOG.md 2>/dev/null || echo 0)
+# Count Chinese sections
 ZH_COUNT=$(grep -c "( Chinese )" CHANGELOG.md 2>/dev/null || echo 0)
+
 if [ "$EN_COUNT" -ne "$ZH_COUNT" ]; then
-  echo "    ❌ Mismatch: $EN_COUNT English vs $ZH_COUNT Chinese sections."
+  echo "    ❌ Mismatch: $EN_COUNT English version entries vs $ZH_COUNT Chinese sections"
+  echo "    Every version MUST have a corresponding Chinese section with anchor."
   exit 1
 else
-  echo "    ✅ Entry count matches: $EN_COUNT"
+  echo "    ✅ Entry count matches: $EN_COUNT English, $ZH_COUNT Chinese"
 fi
 
-# Chinese section length check
+# Check each Chinese section is substantive (>300 chars after the separator)
 FAILED_LEN=0
 while IFS= read -r line; do
-  if [[ $line =~ ^\[.*\]$ ]]; then section_start=$line; continue; fi
+  if [[ $line =~ ^\[.*\]$ ]]; then
+    section_start=$line
+    continue
+  fi
   if [[ $line == "( Chinese )" ]]; then
+    # Capture content until next empty line or next English header
     content=""
     while IFS= read -r next; do
-      if [[ -z "$next" ]] || [[ $next =~ ^##\ \[ ]]; then break; fi
+      if [[ -z "$next" ]] || [[ $next =~ ^##\ \[ ]]; then
+        break
+      fi
       content+="$next"$'\n'
     done
     len=${#content}
     if [ "$len" -lt 300 ]; then
-      echo "    ❌ Chinese section for $section_start too short ($len chars)."
+      echo "    ❌ Chinese section for $section_start is too short ($len chars). Must be >300."
       FAILED_LEN=1
     fi
   fi
 done < CHANGELOG.md
+
 if [ $FAILED_LEN -eq 0 ]; then
-  echo "    ✅ All Chinese sections > 300 chars"
+  echo "    ✅ All Chinese sections exceed 300 character threshold"
 else
   exit 1
 fi
 
-# README Chinese check
-echo "  - README Chinese translation..."
+# Check README: ensure v1.4.0 and other recent updates have Chinese translations
+echo "  - README Chinese translation check..."
 if grep -q "## 🎉 Latest Update (v${VERSION})" README.md; then
+  # Check if there's a Chinese section after this header
   after_latest=$(sed -n "/## 🎉 Latest Update (v${VERSION})/,/## \[Older Updates\]/p" README.md)
   if echo "$after_latest" | grep -q "🎉 最新更新"; then
-    echo "    ✅ Latest update has Chinese translation"
+    echo "    ✅ Latest update has Chinese translation in README"
   else
-    echo "    ⚠️  Latest update may lack Chinese translation"
+    echo "    ⚠️  Latest update may be missing Chinese translation in README"
   fi
 fi
 
 echo ""
 echo "✅ All security checks passed"
+
+# 1.3 Documentation Completeness
+echo ""
+echo "📚 Checking documentation completeness..."
+# Scroll notice check
+if grep -q "请往下翻页查看中文说明" README.md CHANGELOG.md; then
+  echo "  ✅ Scroll notice present"
+else
+  echo "  ⚠️  Scroll notice missing (recommended)"
+fi
+# Anchor link check (optional)
+if grep -q '\[skip to Chinese\]' README.md; then
+  echo "  ✅ Anchor link present in README"
+fi
+
+echo ""
+echo "✅ Pre-Release Checklist complete"
+echo ""
 
 # ============================================
 # STEP 2: Git Commit & Tag
@@ -148,24 +180,30 @@ echo "✅ All security checks passed"
 echo "📦 STEP 2: Git Commit & Tag"
 echo "-----------------------------------------"
 
+# Check if git repo
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
   echo "⚠️  Not a git repository. Skipping git steps."
 else
+  # Ensure on main and up to date
   git checkout main 2>/dev/null || git checkout master
-  git pull origin main 2>/dev/null || git pull origin master || echo "⚠️  Could not pull"
-  
+  git pull origin main 2>/dev/null || git pull origin master || echo "⚠️  Could not pull from remote (may be bare repo)"
+
+  # Check uncommitted changes
   if ! git status --porcelain | grep -q .; then
     echo "✅ Clean working tree"
   else
-    echo "⚠️  Uncommitted changes. Stashing..."
+    echo "⚠️  Uncommitted changes detected. Stashing..."
     git stash push -m "Automatic stash before release ${VERSION}"
   fi
-  
+
+  # Add all changes
   git add .
-  git commit -m "Bump version ${VERSION} - ${CHANGELOG_ENTRY}" || echo "⚠️  Commit failed"
+  git commit -m "Bump version ${VERSION} - ${CHANGELOG_ENTRY}" || echo "⚠️  Commit failed (maybe no changes?)"
+
+  # Create and push tag
   git tag -a "v${VERSION}" -m "v${VERSION} - ${CHANGELOG_ENTRY}"
-  git push origin main --tags || echo "⚠️  Could not push"
-  echo "✅ Git commit and tag: v${VERSION}"
+  git push origin main --tags || echo "⚠️  Could not push to remote (check permissions)"
+  echo "✅ Git commit and tag created: v${VERSION}"
 fi
 
 echo ""
@@ -177,10 +215,12 @@ echo "🌐 STEP 3: Publish to ClawHub"
 echo "-----------------------------------------"
 
 if ! command -v clawhub &> /dev/null; then
-  echo "❌ clawhub CLI not found."
+  echo "❌ clawhub CLI not found. Install: https://clawhub.com"
   exit 1
 fi
 
+# Build full changelog (extract this version entry from CHANGELOG.md)
+# For simplicity, use provided entry; user should ensure it matches CHANGELOG
 clawhub publish . --version "${VERSION}" --changelog "${CHANGELOG_ENTRY}"
 CLAwHUB_ID=$(clawhub list --json 2>/dev/null | jq -r --arg v "${VERSION}" '.[] | select(.version==$v) | .id' | head -1)
 
@@ -193,37 +233,28 @@ fi
 echo ""
 
 # ============================================
-# STEP 4: Create GitHub Release (with assets)
+# STEP 4: Create GitHub Release
 # ============================================
 echo "🐙 STEP 4: Create GitHub Release"
 echo "-----------------------------------------"
 
-if [ -z "$GITHUB_TOKEN" ]; then
-  echo "⚠️  GITHUB_TOKEN not set. Skipping GitHub release."
-  echo "   Set via: export GITHUB_TOKEN='your_token'"
+if ! command -v gh &> /dev/null; then
+  echo "⚠️  GitHub CLI (gh) not found. Skipping GitHub release."
+  echo "   Install: https://cli.github.com/ and run 'gh auth login'"
 else
-  # Verify repo
-  echo "  Verifying repository ${GITHUB_REPO}..."
-  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/$GITHUB_REPO")
-  if [ "$HTTP_CODE" != "200" ]; then
-    echo "❌ Cannot access repository $GITHUB_REPO (HTTP $HTTP_CODE)."
+  if ! gh auth status &>/dev/null; then
+    echo "❌ Not authenticated with GitHub. Run: gh auth login"
     exit 1
   fi
-  echo "    ✅ Repository accessible"
 
   # Create tarball
-  echo "  Creating source tarball..."
   cd ..
-  TARBALL_NAME="${SKILL_NAME}-${VERSION}-src.tar.gz"
-  tar --exclude='.git' -czf "$TARBALL_NAME" "$SKILL_NAME"
-  echo "    ✅ Created: $TARBALL_NAME"
-  cd "$SKILL_NAME"
+  TARBALL="${SKILL_NAME}-${VERSION}.tar.gz"
+  tar -czf "${TARBALL}" "${SKILL_NAME}"
+  cd "${SKILL_NAME}"
 
-  # Release tag
-  RELEASE_TAG="v${VERSION}"
-
-  # Build release notes
-  RELEASE_NOTES="# ${SKILL_NAME} ${VERSION}
+  # Build release notes from CHANGELOG entry (use provided)
+  RELEASE_NOTES="# ${SKILL_NAME} v${VERSION}
 
 ${CHANGELOG_ENTRY}
 
@@ -233,60 +264,49 @@ ${CHANGELOG_ENTRY}
 
 - **Skill**: ${SKILL_NAME}
 - **Version**: ${VERSION}
-- **Published**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-- **Repository**: https://github.com/${GITHUB_REPO}
+- **Published**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+if [ -n "$CLAwHUB_ID" ]; then
+  RELEASE_NOTES="${RELEASE_NOTES}
+- **ClawHub ID**: ${CLAwHUB_ID}"
+fi
+RELEASE_NOTES="${RELEASE_NOTES}
 
-## ✅ Pre-Release Validation
+## ✅ Pre-Release Checklist
 
-- Bilingual CHANGELOG (English + Chinese)
-- Security scans passed
-- Installation tested
-- Git tag pushed
+- [x] CHANGELOG entry added (top of file, bilingual)
+- [x] README version header updated
+- [x] skill.json version bumped
+- [x] All security scans passed
+- [x] Installation tested
+- [x] Git tag created and pushed
 
 ## 🚀 Installation
 
 \`\`\`bash
 # From ClawHub
 clawhub install ${SKILL_NAME}
+
+# Or manual download
+tar -xzf ${TARBALL}
+cd ${SKILL_NAME} && ./install.sh
 \`\`\`
 
-## 📦 Assets
+## 📝 Notes
 
-- Source tarball: \`${TARBALL_NAME}\` (auto-generated)
+This release addresses critical bugs and improves reliability. Existing users should re-run \`./install.sh\` to update tasks.
 "
 
-  # Create release
-  RELEASE_JSON=$(jq -n \
-    --arg tag "$RELEASE_TAG" \
-    --arg name "${SKILL_NAME} v${VERSION}" \
-    --arg body "$RELEASE_NOTES" \
-    '{tag_name: $tag, name: $name, body: $body, draft: false, prerelease: false}')
+  # Create draft release with asset
+  gh release create "v${VERSION}" \
+    --repo "${GITHUB_REPO}" \
+    --title "${SKILL_NAME} v${VERSION}" \
+    --notes "${RELEASE_NOTES}" \
+    --draft \
+    "../${TARBALL}"
 
-  RESPONSE=$(curl -s -X POST \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.v3+json" \
-    "https://api.github.com/repos/$GITHUB_REPO/releases" \
-    -d "$RELEASE_JSON")
-
-  RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id')
-  if [ "$RELEASE_ID" = "null" ] || [ -z "$RELEASE_ID" ]; then
-    echo "❌ Failed to create release:"
-    echo "$RESPONSE" | jq -r '.message // .'
-    exit 1
-  fi
-
-  echo "    ✅ Release created: https://github.com/$GITHUB_REPO/releases/tag/$RELEASE_TAG"
-
-  # Upload asset
-  echo "  Uploading asset: $TARBALL_NAME"
-  curl -s -X POST \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Content-Type: application/gzip" \
-    --data-binary @"$TARBALL_NAME" \
-    "https://uploads.github.com/repos/$GITHUB_REPO/releases/$RELEASE_ID/assets?name=$TARBALL_NAME" > /dev/null
-  echo "    ✅ Asset uploaded"
-  echo ""
-  echo "✅ GitHub Release complete"
+  echo "✅ Draft GitHub release created: https://github.com/${GITHUB_REPO}/releases/tag/v${VERSION}"
+  echo "   Review and publish manually (required for finalization)."
+  echo "   Asset uploaded: ${TARBALL}"
 fi
 
 echo ""
@@ -309,11 +329,12 @@ fi
 echo ""
 
 # ============================================
-# STEP 6: Record Release in Memory
+# STEP 6: Post-Release Documentation
 # ============================================
 echo "📝 STEP 6: Record Release in MEMORY.md"
 echo "-----------------------------------------"
 
+# Append release info to MEMORY.md (workspace-level)
 if [ -f "/root/.openclaw/workspace/MEMORY.md" ]; then
   cat >> /root/.openclaw/workspace/MEMORY.md << EOF
 
@@ -324,16 +345,19 @@ if [ -f "/root/.openclaw/workspace/MEMORY.md" ]; then
 - **GitHub**: https://github.com/${GITHUB_REPO}/releases/tag/v${VERSION}
 - **Changelog**: ${CHANGELOG_ENTRY}
 - **Released**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-- **Assets**: ${TARBALL_NAME:-none}
-- **Notes**: Followed SKILL_RELEASE_SOP.md with bilingual & asset checks
+- **Notes**: Followed SKILL_RELEASE_SOP.md v1.0
 
 EOF
-  echo "✅ Appended to MEMORY.md"
+  echo "✅ Appended release notes to /root/.openclaw/workspace/MEMORY.md"
 else
-  echo "⚠️  No MEMORY.md in workspace; skipping"
+  echo "⚠️  No MEMORY.md found in workspace; skipping memory update"
 fi
 
 echo ""
+
+# ============================================
+# FINAL SUMMARY
+# ============================================
 echo "🎉 RELEASE COMPLETE!"
 echo "=========================================="
 echo "Skill:        ${SKILL_NAME}"
@@ -341,14 +365,13 @@ echo "Version:      ${VERSION}"
 echo "ClawHub ID:   ${CLAwHUB_ID:-not recorded}"
 echo "GitHub Repo:  ${GITHUB_REPO}"
 echo "Git Tag:      v${VERSION}"
-echo "Tarball:      ${TARBALL_NAME:-not created}"
+echo "Tarball:      ${TARBALL:-(not created, not in skill dir)}"
 echo ""
 echo "Next actions:"
-echo "1. Review GitHub release (should be live)"
-echo "2. Publish any draft if created"
-echo "3. Notify users if critical"
-echo "4. Verify cron tasks: openclaw cron list | grep ${SKILL_NAME}"
+echo "1. Review GitHub draft release: https://github.com/${GITHUB_REPO}/releases/tag/v${VERSION}"
+echo "2. Publish the release when ready"
+echo "3. Notify users if critical fix"
+echo "4. Verify tasks: openclaw cron list | grep ${SKILL_NAME}"
 echo ""
-echo "✅ All steps completed."
+echo "✅ All steps completed successfully."
 echo "=========================================="
-

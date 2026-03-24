@@ -75,6 +75,39 @@ All notable changes to this skill will be documented in this file.
 ### Note
 Existing installations should re-run `./install.sh` to apply the enhanced extraction framework to their tasks.
 
+<a name="chinese-1-3-4"></a>( Chinese )
+### 已修复（Fixed）
+- **STATE_FILE 变量大小写敏感**：将 `STATE_FILE={workspace}` 改为 `{WORKSPACE}`（大写）以匹配 OpenClaw 的大小写敏感环境变量替换。此 bug 阻止状态文件创建，导致任务在第 2 步挂起并最终超时。
+- **任务可靠性**：修复了任务显示 `running` 但从未实际执行的问题，根源是路径解析错误和 Gateway 状态缓存。
+- **安装脚本**：更新 `install.sh` 在短消息和长消息中都生成正确的 `{WORKSPACE}` 变量。
+
+### 变更（Changed）
+- `install.sh`：所有任务消息现在一致使用 `{WORKSPACE}`（大写）用于 `DAILY_NOTES_DIR`、`PROCESSED_DIR` 和 `STATE_FILE`。
+- 所有现有任务应手动更新或重新运行 `./install.sh` 以应用修复。
+
+### 影响（Impact）
+- `per_agent_compression_*` 任务现在成功创建 `.compression_state.json` 并执行所有步骤。
+- 已验证 `per_agent_compression_hrbp`：约 9 分钟完成，处理 3 个旧笔记，移动文件到 `processed/`，压缩内容到目标文件。
+- 第 2 步不再静默挂起。
+
+### 建议操作（Recommended Actions）
+1. **重新运行安装脚本**：`./install.sh` 以用修正的变量更新所有现有任务。
+2. **监控**接下来计划运行（从 2026-03-21 开始）以确认所有 5 个任务成功完成。
+3. **可选**：对大型 workspace 增加超时至 6000 秒（之前的手动修复已应用）。
+
+### 增强（Enhanced）
+- **提取框架扩展**：新增 **User Traits & Self-Profile** 类别，用于捕获人格特质、沟通偏好、学习风格、价值观、兴趣、优势/劣势、自我描述。
+- **USER.md 格式更新**：提取现在明确在 `## Personal Info / Preferences` 部分突出包含 User Traits。
+- **全面性**：提取类别从 10 个增加到 11 个，确保用户特性系统化保存，与决策、约束、原则、待办、指标、人员、上下文、问题、偏好、引用一起。
+
+### 影响（Impact）
+- 代理现在将构建更全面的用户画像，包括自我感知的特质和沟通风格。
+- 这解决了提取内容过于稀疏的观察；增强框架捕获更细腻的用户信息。
+- 所有任务（hrbp、parenting、decoration、memory_master、main）已更新，在执行计划中包含新类别。
+
+### 备注（Note）
+现有安装应重新运行 `./install.sh` 以应用增强的提取框架到其任务。
+
 ---
 
 ## [1.3.3] - 2026-03-18 (Message Length Fix)

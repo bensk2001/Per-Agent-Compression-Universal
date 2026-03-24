@@ -46,6 +46,40 @@ This is a **non-breaking** update; your compressed notes remain safe.
 
 ---
 
+## 🎉 最新更新 (v1.4.0) - 交付灵活性与弹性
+
+此版本新增 **可配置交付** 和 **自动重试** 功能，使技能更适应多通道环境，并对瞬时故障具有弹性。
+
+### 新特性
+
+**1. 交互式安装器（交付提示）**
+- 安装器现在接受 `--channel`、`--to`、`--account` 参数来控制任务摘要发送目标。
+- 如果未提供参数且运行在交互式终端，会提示输入这些值。
+- 消除硬编码默认值；适应你的钉钉/Telegram/企微配置。
+
+**2. 指数退避自动重试**
+- 任务执行包含重试逻辑，用于处理瞬时故障（网络抖动、API 速率限制、临时模型错误）。
+- 最多 3 次尝试，延迟依次为 2s → 4s → 8s。
+- 永久性错误被记录并跳过；任务继续处理下一个笔记。
+
+**3. 增强失败报告**
+- 如果任何笔记在所有重试后仍失败，摘要公告会包含失败计数，让你清楚看到问题。
+
+### 技术细节
+- 交付配置嵌入任务消息，并应用到 cron 作业的 announce 参数。
+- 重试逻辑是 MSG_FULL 执行计划的一部分；核心压缩算法不变。
+- 状态跟踪不变；失败不会阻塞后续笔记。
+
+### 迁移
+现有用户应**重新运行 `./install.sh`** 以使用新交付配置和重试策略更新任务。脚本将：
+- 提示交付偏好（或使用现有环境参数）
+- 用更新后的消息（含重试指令）重新创建任务
+- 保留现有状态文件和已处理笔记
+
+这是**非破坏性**更新；你已压缩的笔记保持安全。
+
+---
+
 ## [Older Updates]
 
 ---
@@ -59,6 +93,27 @@ Added **User Traits & Self-Profile** extraction category to capture personality,
 ## 🎉 Previously: v1.3.4 - Critical Bug Fix
 
 Fixed a **showstopper bug** where tasks would hang indefinitely due to `{workspace}` (lowercase) not being substituted. All tasks now use `{WORKSPACE}` (uppercase). Verified successful completion.
+
+---
+
+## 🐛 早期版本：v1.3.4 - 关键 bug 修复
+
+修复了一个 **导致任务无限挂起的关键 bug**：`{workspace}`（小写）未被正确替换。现在所有任务都使用 `{WORKSPACE}`（大写）。已验证成功完成。
+
+### 修复内容
+- **STATE_FILE 变量大小写敏感**：将 `STATE_FILE={workspace}` 改为 `{WORKSPACE}`（大写），匹配 OpenClaw 的大小写敏感环境变量替换规则。此 bug 阻止状态文件创建，导致任务在第 2 步挂起并最终超时。
+- **任务可靠性**：修复了任务显示 `running` 但从未实际执行的问题，根源是路径解析错误和 Gateway 状态缓存。
+- **安装脚本**：更新 `install.sh` 在短消息和长消息中都生成正确的 `{WORKSPACE}` 变量。
+
+### 影响
+- `per_agent_compression_*` 任务现在成功创建 `.compression_state.json` 并执行所有步骤。
+- 已验证 `per_agent_compression_hrbp`：约 9 分钟完成，处理 3 个旧笔记，移动文件到 `processed/`，压缩内容到目标文件。
+- 第 2 步不再静默挂起。
+
+### 建议操作
+1. **重新运行安装脚本**：`./install.sh` 以用修正的变量更新所有现有任务。
+2. **监控**接下来计划运行以确认所有 5 个任务成功完成。
+3. **可选**：对大型 workspace 增加超时至 6000 秒。
 
 ---
 
@@ -93,6 +148,40 @@ Based on user feedback, the extraction framework has been expanded to better cap
 
 ### Migration
 Re-run `./install.sh` to update existing tasks with the enhanced extraction framework. No data loss; old compressed notes remain in `processed/` and new runs will use the 11-category framework.
+
+---
+
+## 🆕 之前版本：v1.3.5 - 用户特质增强
+
+根据用户反馈，提取框架已扩展以更好地捕获用户特性。
+
+### 新内容
+- **新增提取类别**：**User Traits & Self-Profile**
+  - 捕获人格特质、沟通偏好、学习风格、价值观、兴趣、优势/劣势、自我描述（直接引用或转述）
+  - 此信息突出保存到 `USER.md` 的 `## Personal Info / Preferences` 部分
+- **框架扩展**：综合提取框架现在有 **11 个类别**（从 10 个增加）
+- **更丰富的人物画像**：代理可以随着时间的推移构建更完整的用户个性和偏好图片
+
+### 为何重要
+- 之前提取的内容过于稀疏；用户特质未被系统捕获
+- 现在代理不仅能记住你**做了什么**，还能记住你**是谁**以及**你如何偏好沟通**
+- 基于积累的自我画像，实现更个性化的交互
+
+### 更新后的提取类别
+1. 关键决策
+2. 约束条件
+3. 原则与价值观
+4. 待办事项与承诺
+5. 指标与目标
+6. 人员与角色
+7. 上下文
+8. 问题与解决方案
+9. 偏好
+10. **User Traits & Self-Profile** ← 新增
+11. 引用
+
+### 迁移
+重新运行 `./install.sh` 以更新现有任务，应用增强的提取框架。无数据丢失；旧压缩笔记保留在 `processed/` 中，新运行将使用 11 类别框架。
 
 ---
 

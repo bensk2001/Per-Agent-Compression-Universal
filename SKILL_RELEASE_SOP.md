@@ -29,7 +29,10 @@ Before any publish, run through this checklist:
 - [ ] **CHANGELOG.md** entry added at TOP (newest first), with full details by category
 - [ ] **README.md** version header matches `skill.json`
 - [ ] **skill.json** version field bumped
-- [ ] **Bilingual integrity**: English section complete, then Chinese section complete (not interleaved)
+- [ ] **Bilingual integrity**: 
+  - [ ] Every English version entry (`## [X.Y.Z]`) MUST have a corresponding Chinese section with anchor `<a name="chinese-X-Y-Z"></a>( Chinese )`
+  - [ ] Chinese section must be substantive (> 300 characters, not just a placeholder)
+  - [ ] Verify count: `en_count=$(grep -c "^## \[[0-9]" CHANGELOG.md)` equals `zh_count=$(grep -c "( Chinese )" CHANGELOG.md)`
 - [ ] **Scroll notice** present at top of README and CHANGELOG: `请往下翻页查看中文说明`
 - [ ] **Anchor links** functional (if platform supports markdown anchors)
 - [ ] **Security scans passed** (see below)
@@ -37,9 +40,33 @@ Before any publish, run through this checklist:
 - [ ] **No hardcoded credentials** in any file (IDs, tokens, secrets)
 - [ ] **Config data leakage check** passed (no user-specific config values embedded)
 - [ ] **Git tag** created and pushed
-- [ ] **GitHub Release** body equals full CHANGELOG entry (not truncated)
+- [ ] **GitHub Release**:
+  - [ ] Body equals full CHANGELOG entry (not truncated)
+  - [ ] **ASSET UPLOADED**: Source tarball/zip file MUST be uploaded to the release
+    - Run: `git archive --format=tar.gz --output=per-agent-compression-universal-vX.Y.Z-src.tar.gz HEAD`
+    - Upload via API or `gh release upload` with correct filename
+  - [ ] Verify asset appears in release page (check GitHub UI or API)
 - [ ] **ClawHub changelog** parameter matches full CHANGELOG entry
 - [ ] **Local deploy** synced to `/root/.openclaw/skills/`
+- [ ] **README Chinese translation** up to date:
+  - [ ] All "Latest Update" and "Previously" sections have corresponding Chinese translations
+  - [ ] No "Older Updates" left untranslated (if Chinese section exists, it should cover all English additions since last full translation)
+- [ ] **Release script** (`scripts/release.sh`) updated to latest version with asset upload and strict bilingual checks
+
+---
+
+## Critical Reminders (Based on Past Issues)
+
+1. **Bilingual completeness is NOT optional**: Every version entry must have a full Chinese translation. Partial or placeholder translations will fail the checklist.
+2. **README Chinese must track English**: When adding new "Latest Update" content in English, immediately add corresponding Chinese translation below. Do not defer.
+3. **Assets must be uploaded**: GitHub releases without source tarballs are considered incomplete. Ensure `release.sh` uploads the tarball, or manually upload via GitHub UI.
+4. **Run release script from skill root**: `cd /path/to/skill && ./scripts/release.sh X.Y.Z "changelog entry"` — this ensures all paths resolve correctly.
+5. **Set GITHUB_REPO and GITHUB_TOKEN** before running:
+   ```bash
+   export GITHUB_REPO="your-username/your-repo"
+   export GITHUB_TOKEN="ghp_..."  # with repo scope
+   ```
+6. **Review before publishing**: The release script creates a **draft** release (if using gh CLI). Always review the draft on GitHub before publishing to catch any formatting issues.
 
 ---
 
