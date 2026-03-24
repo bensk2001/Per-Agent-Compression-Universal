@@ -1,0 +1,56 @@
+#!/bin/bash
+# Pre-commit hook for per-agent-compression-universal skill
+# Runs quality checks before allowing a commit
+
+set -e
+
+echo "🔍 Running pre-commit checks..."
+
+SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$SKILL_DIR"
+
+# 1. Bilingual completeness
+echo "  📖 Checking bilingual completeness..."
+if [ -f "scripts/validate-bilingual.sh" ]; then
+  if ! scripts/validate-bilingual.sh; then
+    echo "❌ Bilingual validation failed. Fix CHANGELOG translations."
+    exit 1
+  fi
+else
+  echo "⚠️  validate-bilingual.sh not found, skipping"
+fi
+
+# 2. Install script parameter inference
+echo "  🔧 Checking install.sh parameter inference..."
+if grep -E "(--model|--channel|--to)" install.sh | grep -v "model:\s*auto\|channel:\s*auto\|to:\s*auto" > /dev/null; then
+  echo "❌ Install script contains hardcoded parameters. Must use inference."
+  exit 1
+fi
+
+# 3. Quick scan for leaked IDs (exclude CHANGELOG)
+echo "  🔒 Scanning for potential ID leakage..."
+if grep -rE "[0-9]{10,}" . --exclude-dir=.git --exclude=CHANGELOG.md --exclude="*.tar.gz" | grep -v '.tar.gz'; then
+  echo "❌ Found long numeric strings (possible IDs). Review and remove."
+  exit 1
+fi
+
+# 4. Ensure version consistency (if CHANGELOG or README changed)
+if git diff --cached --name-only | grep -qE '^(CHANGELOG\.md|README\.md|skill\.json)$'; then
+  echo "  📌 Checking version consistency..."
+  # Extract latest version from CHANGELOG
+  latest_ver=$(grep -oE '^## \[[0-9.]+\]' CHANGELOG.md | head -1 | grep -oE '[0-9.]+')
+  readme_ver=$(grep -oP '\*\*Version\*\*:\s*\K[0-9.]+' README.md | head -1)
+  skill_ver=$(grep -oP '"version"\s*:\s*"\K[0-9.]+' skill.json)
+
+  if [ "$latest_ver" != "$readme_ver" ] || [ "$latest_ver" != "$skill_ver" ]; then
+    echo "❌ Version mismatch:"
+    echo "   CHANGELOG: $latest_ver"
+    echo "   README:    $readme_ver"
+    echo "   skill.json: $skill_ver"
+    echo "   All must be updated to the same version."
+    exit 1
+  fi
+fi
+
+echo "✅ All pre-commit checks passed"
+exit 0
